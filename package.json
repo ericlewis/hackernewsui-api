@@ -9,12 +9,9 @@
     "test": "tap --no-coverage  --no-esm"
   },
   "dependencies": {
-    "fast-json-stringify": "2.7.6",
     "fastify": "^3.17.0",
-    "firebase": "8.6.8",
     "html-entities": "2.3.2",
     "node-html-markdown": "0.1.7",
-    "promise.any": "2.0.2",
     "undici-fetch": "1.0.0-rc.1"
   },
   "devDependencies": {
