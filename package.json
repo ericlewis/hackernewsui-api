@@ -1,0 +1,34 @@
+{
+  "name": "fastify-starter",
+  "version": "1.0.0",
+  "description": "Get started using Fastify with this basic template.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/start.js",
+    "dev": "nodemon src/start.js",
+    "test": "tap --no-coverage  --no-esm"
+  },
+  "dependencies": {
+    "fast-json-stringify": "2.7.6",
+    "fastify": "^3.17.0",
+    "firebase": "8.6.8",
+    "html-entities": "2.3.2",
+    "node-html-markdown": "0.1.7",
+    "promise.any": "2.0.2",
+    "undici-fetch": "1.0.0-rc.1"
+  },
+  "devDependencies": {
+    "tap": "^14.10.2",
+    "nodemon": "^2.0.1"
+  },
+  "keywords": [
+    "fastify",
+    "node.js",
+    "backend",
+    "server",
+    "http"
+  ],
+  "eslintConfig": {
+    "sourceType": "script"
+  }
+}
