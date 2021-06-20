@@ -34,13 +34,14 @@ async function recursiveComments(item) {
     kids = await Promise.all(
       item.kids.map(async (id) => {
         const item = await fetchItemURL(`${id}.json`);
-        const kids = await recursiveComments(item);
+        const comments = await recursiveComments(item);
 
         const text = parseText(item);
 
         return {
           ...item,
-          kids,
+          comments,
+          kids: undefined,
           text
         };
       })
@@ -75,11 +76,12 @@ function build(opts) {
     const item = await fetchItemURL(req.params.id);
     const text = parseText(item);
 
-    const kids = await recursiveComments(item);
+    const comments = await recursiveComments(item);
 
     const result = {
       ...item,
-      kids,
+      comments,
+      kids: undefined,
       text
     };
 
