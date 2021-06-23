@@ -90,7 +90,8 @@ function build(opts) {
 
   app.get("/v0/:endpoint", async (req, _reply) => {
     const ids = await fetchIdsURL(req.params.endpoint);
-    return Promise.all(ids.map((id) => fetchItemURL(`${id}.json`)));
+    const result = await Promise.all(ids.map((id) => fetchItemURL(`${id}.json`)));
+    return result.filter(o => o);
   });
 
   app.get("/", (_req, _reply) => {
