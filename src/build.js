@@ -105,10 +105,12 @@ function build(opts) {
   app.get("/v1/user/:id", async (req, _reply) => {
     const item = await fetchUser(req.params.id);
     const about = parseAbout(item);
+    const submitted = await Promise.all(item.submitted.map((id) => fetchItemURL(`${id}.json`)));
 
     const result = {
       ...item,
-      about
+      about,
+      submitted
     };
 
     return result;
