@@ -36,7 +36,7 @@ function parseText(item) {
 
 function parseAbout(item) {
   if (item.about) {
-    return nhm.translate(decode(item.about));
+    return decode(item.about);
   }
 
   return undefined;
@@ -104,7 +104,14 @@ function build(opts) {
 
   app.get("/v0/user/:id", async (req, _reply) => {
     const item = await fetchUser(req.params.id);
-    return item;
+    const about = parseAbout(item);
+
+    const result = {
+      ...item,
+      about
+    };
+
+    return result;
   });
 
   app.get("/v1/user/:id", async (req, _reply) => {
