@@ -14,6 +14,12 @@ async function fetchItemURL(id) {
   return response.json();
 }
 
+async function fetchUser(id) {
+  const url = `https://hacker-news.firebaseio.com/v0/user/${id}`;
+  const response = await fetch(url);
+  return response.json();
+}
+
 async function fetchIdsURL(endpoint) {
   const url = `https://hacker-news.firebaseio.com/v0/${endpoint}`;
   const response = await fetch(url);
@@ -23,6 +29,14 @@ async function fetchIdsURL(endpoint) {
 function parseText(item) {
   if (item.text) {
     return nhm.translate(decode(item.text));
+  }
+
+  return undefined;
+}
+
+function parseAbout(item) {
+  if (item.about) {
+    return nhm.translate(decode(item.about));
   }
 
   return undefined;
@@ -83,6 +97,18 @@ function build(opts) {
       comments,
       kids: undefined,
       text
+    };
+
+    return result;
+  });
+
+  app.get("/v1/user/:id", async (req, _reply) => {
+    const item = await fetchUser(req.params.id);
+    const about = parseAbout(item);
+
+    const result = {
+      ...item,
+      about
     };
 
     return result;
