@@ -36,7 +36,7 @@ function parseText(item) {
 
 function parseAbout(item) {
   if (item.about) {
-    return decode(item.about);
+    return nhm.translate(decode(item.about));
   }
 
   return undefined;
