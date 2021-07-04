@@ -102,6 +102,18 @@ function build(opts) {
     return result;
   });
 
+  app.get("/v0/user/:id", async (req, _reply) => {
+    const item = await fetchUser(req.params.id);
+    const about = parseAbout(item);
+
+    const result = {
+      ...item,
+      about
+    };
+
+    return result;
+  });
+
   app.get("/v1/user/:id", async (req, _reply) => {
     const item = await fetchUser(req.params.id);
     const about = parseAbout(item);
