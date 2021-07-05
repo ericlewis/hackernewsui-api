@@ -80,7 +80,8 @@ function build(opts) {
 
     const result = {
       ...item,
-      text
+      text,
+      url: item.url ? encodeURI(item.url) : undefined
     };
 
     return result;
@@ -96,7 +97,8 @@ function build(opts) {
       ...item,
       comments,
       kids: undefined,
-      text
+      text,
+      url: item.url ? encodeURI(item.url) : undefined
     };
 
     return result;
