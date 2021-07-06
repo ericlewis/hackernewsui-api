@@ -16,7 +16,7 @@ function parse(text) {
   return undefined;
 }
 
-async function fetchItem(id) {
+async function fetchItem(id, includeKids = true) {
   const url = `https://hacker-news.firebaseio.com/v0/item/${id}.json`;
   const response = await fetch(url);
   const json = await response.json();
@@ -25,7 +25,7 @@ async function fetchItem(id) {
 
   return {
     ...json,
-    kids: undefined,
+    kids: includeKids ? json.kids : undefined,
     text
   }
 }
@@ -119,7 +119,7 @@ function build(opts) {
 
   app.get("/v0/:endpoint", async (req, _reply) => {
     const ids = await fetchIds(req.params.endpoint);
-    const result = await Promise.all(ids.map((id) => fetchItem(id)));
+    const result = await Promise.all(ids.map((id) => fetchItem(id, false)));
     return result.filter(o => o);
   });
 
