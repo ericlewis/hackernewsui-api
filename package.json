@@ -9,10 +9,10 @@
     "test": "tap --no-coverage  --no-esm"
   },
   "dependencies": {
-    "fastify": "^3.17.0",
+    "fastify": "^3.18.1",
     "html-entities": "2.3.2",
     "node-html-markdown": "0.1.7",
-    "undici-fetch": "1.0.0-rc.1"
+    "undici-fetch": "1.0.0-rc.4"
   },
   "devDependencies": {
     "tap": "^14.10.2",
