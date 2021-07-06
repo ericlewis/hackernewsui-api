@@ -8,35 +8,40 @@ const { NodeHtmlMarkdown } = require("node-html-markdown");
 
 const nhm = new NodeHtmlMarkdown();
 
-async function fetchItemURL(id) {
-  const url = `https://hacker-news.firebaseio.com/v0/item/${id}`;
+async function fetchItem(id) {
+  const url = `https://hacker-news.firebaseio.com/v0/item/${id}.json`;
   const response = await fetch(url);
-  return response.json();
+  const json = await response.json();
+
+  const text = parse(json.text) || undefined;
+
+  return {
+    ...json,
+    text
+  }
 }
 
 async function fetchUser(id) {
-  const url = `https://hacker-news.firebaseio.com/v0/user/${id}`;
+  const url = `https://hacker-news.firebaseio.com/v0/user/${id}.json`;
   const response = await fetch(url);
-  return response.json();
-}
+  const json = await response.json();
+  const about = parse(json.about) || undefined;
 
-async function fetchIdsURL(endpoint) {
-  const url = `https://hacker-news.firebaseio.com/v0/${endpoint}`;
-  const response = await fetch(url);
-  return response.json();
-}
-
-function parseText(item) {
-  if (item.text) {
-    return nhm.translate(decode(item.text));
+  return {
+    ...json,
+    about
   }
-
-  return undefined;
 }
 
-function parseAbout(item) {
-  if (item.about) {
-    return nhm.translate(decode(item.about));
+async function fetchIds(endpoint) {
+  const url = `https://hacker-news.firebaseio.com/v0/${endpoint}.json`;
+  const response = await fetch(url);
+  return response.json();
+}
+
+function parse(text) {
+  if (text) {
+    return nhm.translate(decode(text));
   }
 
   return undefined;
@@ -47,16 +52,13 @@ async function recursiveComments(item) {
   if (item.kids) {
     kids = await Promise.all(
       item.kids.map(async (id) => {
-        const item = await fetchItemURL(`${id}.json`);
+        const item = await fetchItem(id);
         const comments = await recursiveComments(item);
-
-        const text = parseText(item);
 
         return {
           ...item,
           comments,
-          kids: undefined,
-          text
+          kids: undefined
         };
       })
     );
@@ -69,18 +71,14 @@ function build(opts) {
   const app = fastify(opts);
 
   app.get("/v0/item/:id", async (req, _reply) => {
-    const item = await fetchItemURL(req.params.id);
+    const item = await fetchItem(req.params.id);
 
     if (item.id === undefined || item.id === null) {
       return;
     }
 
-    const text =
-      item.text !== null ? nhm.translate(decode(item.text)) : undefined;
-
     const result = {
       ...item,
-      text,
       url: item.url ? encodeURI(item.url) : undefined
     };
 
@@ -88,42 +86,29 @@ function build(opts) {
   });
 
   app.get("/v1/item/:id", async (req, _reply) => {
-    const item = await fetchItemURL(req.params.id);
-    const text = parseText(item);
-
+    const item = await fetchItem(req.params.id);
     const comments = await recursiveComments(item);
 
     const result = {
       ...item,
       comments,
       kids: undefined,
-      text,
       url: item.url ? encodeURI(item.url) : undefined
     };
 
     return result;
   });
 
-  app.get("/v0/user/:id", async (req, _reply) => {
-    const item = await fetchUser(req.params.id);
-    const about = parseAbout(item);
-
-    const result = {
-      ...item,
-      about
-    };
-
-    return result;
+  app.get("/v0/user/:id", (req, _reply) => {
+    return fetchUser(req.params.id);
   });
 
   app.get("/v1/user/:id", async (req, _reply) => {
     const item = await fetchUser(req.params.id);
-    const about = parseAbout(item);
-    const submitted = await Promise.all(item.submitted.map((id) => fetchItemURL(`${id}.json`)));
+    const submitted = await Promise.all(item.submitted.map((id) => fetchItem(id)));
 
     const result = {
       ...item,
-      about,
       submitted
     };
 
@@ -131,13 +116,13 @@ function build(opts) {
   });
 
   app.get("/v0/:endpoint", async (req, _reply) => {
-    const ids = await fetchIdsURL(req.params.endpoint);
-    const result = await Promise.all(ids.map((id) => fetchItemURL(`${id}.json`)));
+    const ids = await fetchIds(req.params.endpoint);
+    const result = await Promise.all(ids.map((id) => fetchItem(id)));
     return result.filter(o => o);
   });
 
   app.get("/", (_req, _reply) => {
-    return { message: "whatchu lookin at willis?" };
+    return { message: "wat?" };
   });
 
   return app;
