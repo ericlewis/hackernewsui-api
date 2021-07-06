@@ -8,6 +8,14 @@ const { NodeHtmlMarkdown } = require("node-html-markdown");
 
 const nhm = new NodeHtmlMarkdown();
 
+function parse(text) {
+  if (text) {
+    return nhm.translate(decode(text));
+  }
+
+  return undefined;
+}
+
 async function fetchItem(id) {
   const url = `https://hacker-news.firebaseio.com/v0/item/${id}.json`;
   const response = await fetch(url);
@@ -17,6 +25,7 @@ async function fetchItem(id) {
 
   return {
     ...json,
+    kids: undefined,
     text
   }
 }
@@ -25,6 +34,7 @@ async function fetchUser(id) {
   const url = `https://hacker-news.firebaseio.com/v0/user/${id}.json`;
   const response = await fetch(url);
   const json = await response.json();
+
   const about = parse(json.about) || undefined;
 
   return {
@@ -37,14 +47,6 @@ async function fetchIds(endpoint) {
   const url = `https://hacker-news.firebaseio.com/v0/${endpoint}.json`;
   const response = await fetch(url);
   return response.json();
-}
-
-function parse(text) {
-  if (text) {
-    return nhm.translate(decode(text));
-  }
-
-  return undefined;
 }
 
 async function recursiveComments(item) {
