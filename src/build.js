@@ -166,10 +166,12 @@ function build(opts) {
     const result = await Promise.all([
       parseURL("https://news.ycombinator.com/news"),
       parseURL("https://news.ycombinator.com/news?p=2"),
-      parseURL("https://news.ycombinator.com/news?p=3")
+      parseURL("https://news.ycombinator.com/news?p=3"),
+      parseURL("https://news.ycombinator.com/news?p=4")
     ]);
 
-    return result.flat();
+    const flattenedResults = result.flat();
+    return flattenedResults;
   });
 
   app.get("/", (_req, _reply) => {
