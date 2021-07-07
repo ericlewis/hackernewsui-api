@@ -78,6 +78,7 @@ async function parseURL(urlString) {
   return root.querySelectorAll(".athing").map((t) => {
     const titleSelector = t.querySelector(".storylink");
     const sibling = t.nextElementSibling;
+    const chrome = sibling.querySelectorAll(".subtext > a");
 
     const id = parseInt(t.getAttribute("id"));
     const title = titleSelector.rawText;
@@ -87,10 +88,7 @@ async function parseURL(urlString) {
     const time =
       Date.parse(sibling.querySelector(".age")?.getAttribute("title")) / 1000;
     const descendants = parseInt(
-      sibling
-        .querySelectorAll(".subtext > a")
-        .map((o) => o.lastChild.toString())
-        .pop()
+      chrome.map((o) => o.lastChild.toString()).pop()
     );
     const url = titleSelector.getAttribute("href");
 
@@ -102,7 +100,8 @@ async function parseURL(urlString) {
       time,
       title,
       descendants,
-      url
+      url,
+      type: chrome.length > 1 ? "story" : "job"
     };
   });
 }
