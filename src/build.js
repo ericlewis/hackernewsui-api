@@ -70,8 +70,27 @@ async function recursiveComments(item) {
   return kids;
 }
 
-async function parseURL(urlString) {
-  const response = await fetch(urlString);
+function convertEndpointToWebEndpoint(endpoint) {
+  switch (endpoint) {
+    case "topstories":
+      return "news";
+    case "newstories":
+      return "newest";
+    case "jobstories":
+      return "jobs";
+    case "showstories":
+      return "show";
+    case "askstories":
+      return "ask";
+    case "beststories":
+      return "best";
+    default:
+      return "news";
+  }
+}
+
+async function parseURL(endpoint) {
+  const response = await fetch(`https://news.ycombinator.com/${endpoint}`);
   const responseText = await response.text();
   const root = HTMLParser.parse(responseText);
 
@@ -161,15 +180,14 @@ function build(opts) {
   });
 
   app.get("/v1/:endpoint", async (req, _reply) => {
-    const result = await Promise.all([
-      parseURL("https://news.ycombinator.com/news"),
-      parseURL("https://news.ycombinator.com/news?p=2"),
-      parseURL("https://news.ycombinator.com/news?p=3"),
-      parseURL("https://news.ycombinator.com/news?p=4")
-    ]);
-
-    const flattenedResults = result.flat();
-    return flattenedResults;
+    return (
+      await Promise.all([
+        parseURL(convertEndpointToWebEndpoint(req.params.endpoint)),
+        parseURL(`${convertEndpointToWebEndpoint(req.params.endpoint)}?p=2`),
+        parseURL(`${convertEndpointToWebEndpoint(req.params.endpoint)}?p=3`),
+        parseURL(`${convertEndpointToWebEndpoint(req.params.endpoint)}?p=4`)
+      ])
+    ).flat();
   });
 
   app.get("/", (_req, _reply) => {
