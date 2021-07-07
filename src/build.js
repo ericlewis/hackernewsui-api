@@ -109,6 +109,7 @@ async function parseURL(endpoint) {
       chrome.map((o) => o.lastChild.toString()).pop()
     );
     const url = titleSelector.getAttribute("href");
+    const type = chrome.length > 1 ? "story" : "job";
 
     return {
       id,
@@ -118,7 +119,7 @@ async function parseURL(endpoint) {
       title,
       descendants,
       url,
-      type: chrome.length > 1 ? "story" : "job"
+      type
     };
   });
 }
@@ -180,12 +181,20 @@ function build(opts) {
   });
 
   app.get("/v1/:endpoint", async (req, _reply) => {
+    const endpoint = req.params.endpoint;
+
+    if (endpoint === "newstories") {
+      const ids = await fetchIds(endpoint);
+      const result = await Promise.all(ids.map((id) => fetchItem(id, false)));
+      return result.filter((o) => o);
+    }
+
     return (
       await Promise.all([
-        parseURL(convertEndpointToWebEndpoint(req.params.endpoint)),
-        parseURL(`${convertEndpointToWebEndpoint(req.params.endpoint)}?p=2`),
-        parseURL(`${convertEndpointToWebEndpoint(req.params.endpoint)}?p=3`),
-        parseURL(`${convertEndpointToWebEndpoint(req.params.endpoint)}?p=4`)
+        parseURL(convertEndpointToWebEndpoint(endpoint)),
+        parseURL(`${convertEndpointToWebEndpoint(endpoint)}?p=2`),
+        parseURL(`${convertEndpointToWebEndpoint(endpoint)}?p=3`),
+        parseURL(`${convertEndpointToWebEndpoint(endpoint)}?p=4`)
       ])
     ).flat();
   });
