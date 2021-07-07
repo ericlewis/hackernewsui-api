@@ -183,6 +183,7 @@ function build(opts) {
   app.get("/v1/:endpoint", async (req, _reply) => {
     const endpoint = req.params.endpoint;
 
+    // New stories uses a different pagination mechanism, therefore we must fallback
     if (endpoint === "newstories") {
       const ids = await fetchIds(endpoint);
       const result = await Promise.all(ids.map((id) => fetchItem(id, false)));
