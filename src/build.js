@@ -22,6 +22,10 @@ async function fetchItem(id, includeKids = true) {
   const response = await fetch(url);
   const json = await response.json();
 
+  if (Object.keys(obj).length === 0) {
+    return undefined
+  }
+
   const text = parse(json?.text) || undefined;
 
   return {
