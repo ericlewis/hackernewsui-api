@@ -82,7 +82,6 @@ async function parseURL(urlString) {
 
     const id = parseInt(t.getAttribute("id"));
     const title = titleSelector.rawText;
-    const rank = parseInt(t.querySelector(".title").rawText);
     const score = parseInt(sibling.querySelector(".score")?.rawText);
     const by = sibling.querySelector(".hnuser")?.rawText;
     const time =
@@ -94,7 +93,6 @@ async function parseURL(urlString) {
 
     return {
       id,
-      rank,
       score,
       by,
       time,
