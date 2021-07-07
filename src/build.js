@@ -22,7 +22,7 @@ async function fetchItem(id, includeKids = true) {
   const response = await fetch(url);
   const json = await response.json();
 
-  const text = parse(json.text) || undefined;
+  const text = parse(json?.text) || undefined;
 
   return {
     ...json,
@@ -36,7 +36,7 @@ async function fetchUser(id) {
   const response = await fetch(url);
   const json = await response.json();
 
-  const about = parse(json.about) || undefined;
+  const about = parse(json?.about) || undefined;
 
   return {
     ...json,
