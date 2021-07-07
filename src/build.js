@@ -21,11 +21,6 @@ async function fetchItem(id, includeKids = true) {
   const url = `https://hacker-news.firebaseio.com/v0/item/${id}.json`;
   const response = await fetch(url);
   const json = await response.json();
-
-  if (json && Object.keys(json).length === 0) {
-    return undefined
-  }
-
   const text = parse(json?.text) || undefined;
 
   return {
@@ -191,7 +186,7 @@ function build(opts) {
     if (endpoint === "newstories") {
       const ids = await fetchIds(endpoint);
       const result = await Promise.all(ids.map((id) => fetchItem(id, false)));
-      return result.filter((o) => o);
+      return result.filter((o) => o.title);
     }
 
     return (
