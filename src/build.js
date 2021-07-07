@@ -165,7 +165,8 @@ function build(opts) {
   app.get("/v1/:endpoint", async (req, _reply) => {
     const result = await Promise.all([
       parseURL("https://news.ycombinator.com/news"),
-      parseURL("https://news.ycombinator.com/news?p=2")
+      parseURL("https://news.ycombinator.com/news?p=2"),
+      parseURL("https://news.ycombinator.com/news?p=3")
     ]);
 
     return result.flat();
