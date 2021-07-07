@@ -5,6 +5,7 @@ const fastify = require("fastify");
 const { decode } = require("html-entities");
 const fetch = require("undici-fetch");
 const { NodeHtmlMarkdown } = require("node-html-markdown");
+const HTMLParser = require("node-html-parser");
 
 const nhm = new NodeHtmlMarkdown();
 
@@ -27,7 +28,7 @@ async function fetchItem(id, includeKids = true) {
     ...json,
     kids: includeKids ? json.kids : undefined,
     text
-  }
+  };
 }
 
 async function fetchUser(id) {
@@ -40,7 +41,7 @@ async function fetchUser(id) {
   return {
     ...json,
     about
-  }
+  };
 }
 
 async function fetchIds(endpoint) {
@@ -67,6 +68,43 @@ async function recursiveComments(item) {
   }
 
   return kids;
+}
+
+async function parseURL(urlString) {
+  const response = await fetch(urlString);
+  const responseText = await response.text();
+  const root = HTMLParser.parse(responseText);
+
+  return root.querySelectorAll(".athing").map((t) => {
+    const titleSelector = t.querySelector(".storylink");
+    const sibling = t.nextElementSibling;
+
+    const id = parseInt(t.getAttribute("id"));
+    const title = titleSelector.rawText;
+    const rank = parseInt(t.querySelector(".title").rawText);
+    const score = parseInt(sibling.querySelector(".score")?.rawText);
+    const by = sibling.querySelector(".hnuser")?.rawText;
+    const time =
+      Date.parse(sibling.querySelector(".age")?.getAttribute("title")) / 1000;
+    const descendants = parseInt(
+      sibling
+        .querySelectorAll(".subtext > a")
+        .map((o) => o.lastChild.toString())
+        .pop()
+    );
+    const url = titleSelector.getAttribute("href");
+
+    return {
+      id,
+      rank,
+      score,
+      by,
+      time,
+      title,
+      descendants,
+      url
+    };
+  });
 }
 
 function build(opts) {
@@ -107,7 +145,9 @@ function build(opts) {
 
   app.get("/v1/user/:id", async (req, _reply) => {
     const item = await fetchUser(req.params.id);
-    const submitted = await Promise.all(item.submitted.map((id) => fetchItem(id)));
+    const submitted = await Promise.all(
+      item.submitted.map((id) => fetchItem(id))
+    );
 
     const result = {
       ...item,
@@ -120,7 +160,16 @@ function build(opts) {
   app.get("/v0/:endpoint", async (req, _reply) => {
     const ids = await fetchIds(req.params.endpoint);
     const result = await Promise.all(ids.map((id) => fetchItem(id, false)));
-    return result.filter(o => o);
+    return result.filter((o) => o);
+  });
+
+  app.get("/v1/:endpoint", async (req, _reply) => {
+    const result = await Promise.all([
+      parseURL("https://news.ycombinator.com/news"),
+      parseURL("https://news.ycombinator.com/news?p=2")
+    ]);
+
+    return result.flat();
   });
 
   app.get("/", (_req, _reply) => {
