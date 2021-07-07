@@ -49,6 +49,12 @@ async function fetchIds(endpoint) {
   return response.json();
 }
 
+async function fetchFeed(endpoint) {
+  const ids = await fetchIds(endpoint);
+  const result = await Promise.all(ids.map((id) => fetchItem(id, false)));
+  return result.filter((o) => o.title);
+}
+
 async function recursiveComments(item) {
   let kids;
   if (item.kids) {
@@ -176,7 +182,7 @@ function build(opts) {
   app.get("/v0/:endpoint", async (req, _reply) => {
     const ids = await fetchIds(req.params.endpoint);
     const result = await Promise.all(ids.map((id) => fetchItem(id, false)));
-    return result.filter((o) => o);
+    return result.filter((o) => o.title);
   });
 
   app.get("/v1/:endpoint", async (req, _reply) => {
@@ -184,19 +190,20 @@ function build(opts) {
 
     // New stories uses a different pagination mechanism, therefore we must fallback
     if (endpoint === "newstories") {
-      const ids = await fetchIds(endpoint);
-      const result = await Promise.all(ids.map((id) => fetchItem(id, false)));
-      return result.filter((o) => o.title);
+      return fetchFeed(endpoint);
     }
 
-    return (
-      await Promise.all([
+    try {
+      const result = await Promise.all([
         parseURL(convertEndpointToWebEndpoint(endpoint)),
         parseURL(`${convertEndpointToWebEndpoint(endpoint)}?p=2`),
         parseURL(`${convertEndpointToWebEndpoint(endpoint)}?p=3`),
         parseURL(`${convertEndpointToWebEndpoint(endpoint)}?p=4`)
-      ])
-    ).flat();
+      ]);
+      return result.flat();
+    } catch (_error) {
+      return fetchFeed(endpoint);
+    }
   });
 
   app.get("/", (_req, _reply) => {
