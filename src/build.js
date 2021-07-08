@@ -188,8 +188,8 @@ function build(opts) {
   app.get("/v1/:endpoint", async (req, _reply) => {
     const endpoint = req.params.endpoint;
 
-    // New stories uses a different pagination mechanism, therefore we must fallback
-    if (endpoint === "newstories") {
+    // New/Job stories uses a different pagination mechanism, therefore we must fallback
+    if (endpoint === "newstories" || endpoint === "jobstories") {
       return fetchFeed(endpoint);
     }
 
